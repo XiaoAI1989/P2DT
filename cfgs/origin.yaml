@@ -1,0 +1,58 @@
+defaults:
+  - _self_
+
+seeds: 
+- 42
+
+tag: null
+vec_envs: 1
+
+train:
+
+  vec_envs: ${vec_envs}
+  env_name:
+    - Walker2d
+    - HalfCheetah
+    - Hopper
+  timesteps: 20000
+  batch_size: 64
+  plot_interval: 200
+  eval_interval: 200
+  eval_episodes: 10
+  warmup_steps: 10_000
+  ewc_item: 0
+  lr_task_token: 1e-4
+  lr_other:  1e-4
+
+
+
+buffer:
+  _target_: buffer.SequenceBuffer
+  dataset: medium
+  sample_type: traj_length
+  pos_encoding: absolute
+  context_len: ${model.context_len}
+  gamma: 1.0
+  
+model:
+  _target_: model.DecisionTransformer
+  n_heads: 1
+  n_blocks: 3
+  drop_p: 0.1
+  hidden_dim: 128
+  context_len: 20
+  reward_scale: 1000
+  max_timestep: 1000
+  n_expert_blocks: 0
+  prompt_len: 0
+
+hydra:
+  job:
+    chdir: true
+  run:
+    dir: ./runs/${now:%Y-%m-%d}/${now:%H-%M-%S}_${hydra.job.override_dirname}
+
+rtg_target:
+    - 12000
+    - 3600
+    - 5000
